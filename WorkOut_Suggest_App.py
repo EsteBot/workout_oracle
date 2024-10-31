@@ -1,6 +1,6 @@
 import streamlit as st
 
-excersize_dict = {'BICEP': ['Inside curl', 'Middle curl', 'Outside curl', 'Overhand grip Middle curl'],
+exercise_dict = {'BICEP': ['Inside curl', 'Middle curl', 'Outside curl', 'Overhand grip Middle curl'],
                   'TRICEP': ['Standing Overhead extentions', 'Laying down front extentions', 'Body weight dips with bench', 'Cable pulldowns'],
                   'CHEST': ['Chest press', 'Cable fly', 'Knee push-up', 'Cable press'],
                   'BACK': ['Standing row', 'Sitting row', 'Reverse fly', 'Stright leg stand talls'],
@@ -23,6 +23,25 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Custom CSS to change button color
+button_style = """
+    <style>
+    .stButton button {
+        background-color: #006766;
+        color: white;
+        border-radius: 10px;
+        border: 5px solid: lightblue;
+    }
+    .stButton button:hover {
+        background-color: white;
+        color: #006766;
+    }
+    </style>
+    """
+
+# Inject the CSS into the Streamlit app
+st.markdown(button_style, unsafe_allow_html=True)
+
 # Centering the headers
 st.markdown("<h3 class='center'>An EsteStyle Streamlit Page Where Python Wiz Meets Workout Biz!</h3>", unsafe_allow_html=True)
 st.markdown("<h1 class='center'></h1>", unsafe_allow_html=True)
@@ -36,22 +55,40 @@ st.markdown("<h4 class='center'>A Workout Combination Suggestion App</h4>", unsa
 
 st.markdown("<h3 class='center'> </h3>", unsafe_allow_html=True)
 
-# Initialize session state for index tracking
+import streamlit as st
+
+# Initialize session state for index tracking, button press, and checkbox states
 if 'cycle_index' not in st.session_state:
     st.session_state.cycle_index = 0
+if 'button_pressed' not in st.session_state:
+    st.session_state.button_pressed = False
+if 'checkbox_states' not in st.session_state:
+    st.session_state.checkbox_states = {}
 
-# Function to cycle through values of each key
-def cycle_values():
+
+# Function to display exercises with checkboxes
+def display_exercises():
     cycle_index = st.session_state.cycle_index
-    st.write(f'Cycle: {[cycle_index + 1]} of 4')
-    for key in excersize_dict:
-        # Display the current item based on cycle_index
-        st.write(f"{key}:   {excersize_dict[key][cycle_index]}")
-    
-    # Update the index, cycling back to 0 if at the end of the lists
-    st.session_state.cycle_index = (cycle_index + 1) % len(next(iter(excersize_dict.values())))
+    st.write(f'Cycle: {cycle_index + 1} of 4')
 
+    for key in exercise_dict:
+        # Checkbox to track completion
+        checkbox_key = f"{key}_{cycle_index}"
+        if checkbox_key not in st.session_state.checkbox_states:
+            st.session_state.checkbox_states[checkbox_key] = False
+        checked = st.checkbox(f"{key}: {exercise_dict[key][cycle_index]}", key=checkbox_key)
+        st.write(' ')
+        
+        # Update session state with checkbox value
+        st.session_state.checkbox_states[checkbox_key] = checked
+
+# Button press logic to display exercises
 if st.button("Get Today's Epic Workouts", icon="🦾", use_container_width=True):
-    
-        cycle_values()
+    st.session_state.button_pressed = True
+    st.session_state.cycle_index = (st.session_state.cycle_index + 1) % len(next(iter(exercise_dict.values())))
+    #display_exercises()
+
+# Persist the button output
+if st.session_state.button_pressed:
+   display_exercises()
 
